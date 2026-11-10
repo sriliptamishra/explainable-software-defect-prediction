@@ -1,0 +1,17 @@
+dataset,variant,model,rows,accuracy,precision,recall,f1
+jm1,with_duplicates,RandomForest,10883,79.6 ± 0.7,46.8 ± 1.9,38.5 ± 2.3,42.2 ± 2.0
+jm1,with_duplicates,XGBoost,10883,79.9 ± 0.5,47.1 ± 1.6,30.7 ± 1.6,37.1 ± 1.1
+jm1,no_duplicates,RandomForest,8910,75.7 ± 0.4,44.8 ± 1.2,34.5 ± 0.7,39.0 ± 0.6
+jm1,no_duplicates,XGBoost,8910,77.0 ± 0.8,48.3 ± 2.8,30.2 ± 1.6,37.1 ± 1.5
+kc1,with_duplicates,RandomForest,2107,83.6 ± 1.2,47.0 ± 4.0,46.5 ± 2.8,46.7 ± 3.1
+kc1,with_duplicates,XGBoost,2107,84.5 ± 1.7,50.2 ± 6.0,43.1 ± 4.1,46.2 ± 4.1
+kc1,no_duplicates,RandomForest,1210,72.2 ± 1.9,46.2 ± 3.9,40.1 ± 3.0,42.9 ± 3.0
+kc1,no_duplicates,XGBoost,1210,73.6 ± 1.9,48.6 ± 5.3,36.9 ± 4.6,42.0 ± 4.9
+pc1,with_duplicates,RandomForest,1107,92.5 ± 1.0,44.2 ± 10.8,47.4 ± 20.9,44.7 ± 13.9
+pc1,with_duplicates,XGBoost,1107,92.6 ± 1.2,46.4 ± 7.9,46.1 ± 7.4,46.2 ± 7.5
+pc1,no_duplicates,RandomForest,952,90.3 ± 1.0,34.6 ± 4.1,37.6 ± 11.1,35.4 ± 6.3
+pc1,no_duplicates,XGBoost,952,89.6 ± 1.5,33.3 ± 5.8,42.0 ± 10.3,36.7 ± 6.4
+cm1,with_duplicates,RandomForest,496,83.5 ± 2.4,19.8 ± 6.2,24.9 ± 12.1,21.5 ± 8.6
+cm1,with_duplicates,XGBoost,496,85.1 ± 3.6,30.0 ± 11.4,35.3 ± 12.1,31.4 ± 9.8
+cm1,no_duplicates,RandomForest,440,80.9 ± 3.8,16.0 ± 14.0,18.4 ± 18.4,16.8 ± 15.3
+cm1,no_duplicates,XGBoost,440,82.3 ± 2.1,21.2 ± 12.9,27.1 ± 16.3,23.8 ± 14.4
