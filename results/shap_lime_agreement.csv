@@ -1,0 +1,5 @@
+dataset,lime_setting,rf_f1,modules,surrogate_R2,top5_overlap_%,sign_agreement_%,shared_pairs
+jm1,discretized,0.365,30,0.13,35,38,53
+jm1,continuous,0.365,30,0.12,47,81,70
+kc1,discretized,0.444,30,0.12,27,95,40
+kc1,continuous,0.444,30,0.25,35,71,52
