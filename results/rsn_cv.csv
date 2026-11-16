@@ -1,0 +1,3 @@
+dataset,model,rows,precision,recall,F1
+kc1,RSN,1210,40.1 ± 2.2,50.7 ± 7.0,44.6 ± 3.8
+jm1,RSN,8910,39.8 ± 2.3,43.3 ± 8.8,40.7 ± 4.0
