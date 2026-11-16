@@ -1,0 +1,3 @@
+dataset,model,lime_setting,modules,surrogate_R2,top5_overlap_%,sign_agreement_%,shared_pairs
+kc1,RSN,discretized,30,0.42,70,100,105
+kc1,RSN,continuous,30,0.65,65,95,97
