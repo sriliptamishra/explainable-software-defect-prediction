@@ -7,7 +7,7 @@ a residual-shuffle network approach with SHAP and LIME"* (Talatapeh et al., Inte
 of Data Science and Analytics, 2026, 22:24).
 
 We evaluate classical baselines (Random Forest, XGBoost) and our own reconstruction of the paper's
-residual-shuffle network (RSN) on PROMISE/NASA defect datasets, and we compare two post-hoc
+residual-shuffle network (RSN) on four PROMISE/NASA defect datasets, and we compare two post-hoc
 explanation methods, SHAP and LIME. The RSN is a reconstruction from the paper's description, not
 the authors' code, which is not publicly available.
 
@@ -30,11 +30,13 @@ comparisons below use data with duplicate rows removed, unless stated otherwise.
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+pip install torch
 jupyter notebook
 ```
 
 Open `notebooks/01_data_exploration.ipynb` and run the cells in order. Outputs are saved to
-`results/`. All random seeds are fixed to 42.
+`results/`. All random seeds are fixed to 42. The RSN cross-validation on JM1 takes about
+30 minutes on a CPU laptop, and the baseline and explanation cells take several minutes each.
 
 ## Method
 
@@ -48,8 +50,8 @@ Open `notebooks/01_data_exploration.ipynb` and run the cells in order. Outputs a
   g = 2, residual 1x1 convolution), global average pooling and a small classifier head with
   dropout 0.5. The model has 8,882 parameters. Training follows the paper's description: AdamW
   with learning rate 3e-4 and cosine decay, weight decay 0.01, batch size 64, at most 100 epochs,
-  early stopping on validation loss (patience 10) using 10% of the training fold, evaluated with
-  stratified 5-fold cross-validation.
+  early stopping on validation loss (patience 10) using 10% of the training fold (held out before
+  SMOTE), evaluated with stratified 5-fold cross-validation on all four datasets.
 - Explanations: SHAP and LIME on 30 predicted-defective test modules per dataset. For Random
   Forest (JM1, KC1) we use TreeSHAP; for RSN (KC1) we use KernelSHAP (model-agnostic). LIME is
   run with discretized and with continuous features.
@@ -77,10 +79,19 @@ Accuracy is misleading on these imbalanced datasets, so F1 and recall are report
 | JM1 | Random Forest | 44.8 ± 1.2 | 34.5 ± 0.7 | 39.0 ± 0.6 |
 | JM1 | XGBoost | 48.3 ± 2.8 | 30.2 ± 1.6 | 37.1 ± 1.5 |
 | JM1 | RSN | 39.8 ± 2.3 | 43.3 ± 8.8 | 40.7 ± 4.0 |
+| PC1 | Random Forest | 34.6 ± 4.1 | 37.6 ± 11.1 | 35.4 ± 6.3 |
+| PC1 | XGBoost | 33.3 ± 5.8 | 42.0 ± 10.3 | 36.7 ± 6.4 |
+| PC1 | RSN | 14.8 ± 1.3 | 58.0 ± 22.7 | 22.3 ± 4.1 |
+| CM1 | Random Forest | 16.0 ± 14.0 | 18.4 ± 18.4 | 16.8 ± 15.3 |
+| CM1 | XGBoost | 21.2 ± 12.9 | 27.1 ± 16.3 | 23.8 ± 14.4 |
+| CM1 | RSN | 18.6 ± 1.5 | 76.7 ± 12.6 | 29.9 ± 2.8 |
 
-The RSN F1 is comparable to the baselines (the differences are within one standard deviation).
-The RSN reaches higher recall and lower precision than the baselines on both datasets. RSN was
-not run on PC1 and CM1.
+The RSN F1 is comparable to the baselines on KC1 and JM1 (differences within one standard
+deviation), clearly lower on PC1, and higher on CM1. The CM1 difference is not reliable: that
+dataset has very few defective modules and the baseline standard deviations are large. On KC1,
+JM1 and PC1 the RSN has higher recall and lower precision than both baselines; on CM1 its recall
+is much higher and its precision lies between the two baselines. We did not tune the decision
+threshold or test why this happens.
 
 ### SHAP vs LIME agreement, Random Forest (30 modules per dataset)
 
@@ -92,7 +103,8 @@ not run on PC1 and CM1.
 | KC1 | continuous | 0.25 | 35% | 71% |
 
 Top SHAP features (Random Forest): JM1: iv(g), loc, lOBlank, branchCount, v(g). KC1:
-total_Opnd, uniq_Opnd, lOBlank, l, d. Plots for JM1 are in `results/`.
+total_Opnd, uniq_Opnd, lOBlank, l, d. Top-5 overlap expected by chance is about 24%. Plots for
+JM1 are in `results/`.
 
 ### SHAP vs LIME agreement, RSN (KC1, 30 modules, one split)
 
@@ -107,18 +119,37 @@ the RSN than on the Random Forest, but the SHAP method also differs (KernelSHAP 
 the two agreement tables are not directly comparable and we cannot attribute the difference to
 the model alone.
 
+## Sanity checks on the RSN
+
+- The channel-shuffle block reorders 8 channels (2 groups) as [0, 4, 1, 5, 2, 6, 3, 7], as
+  expected for the standard ShuffleNet shuffle.
+- Random-label control on KC1: with the labels randomly permuted, the RSN F1 drops from
+  44.6 ± 3.8 to 4.2 ± 3.2, which is consistent with no label leakage in the pipeline (one
+  shuffle, one dataset).
+
+These checks show that the implementation behaves sensibly. They do not show that it
+reproduces the paper's architecture or results.
+
 ## Limitations
 
 - F1 scores are far below the 98% reported in the paper. We did not find the reason. Our RSN is
   a reconstruction: the paper does not specify how tabular metrics are mapped to the CNN input,
   and its reported model size (1.42 M parameters) is much larger than ours.
 - No outlier removal or correlation filter was applied (both are in the paper's pipeline).
-- RSN results cover KC1 and JM1 only, and its explanations only KC1.
+- RSN explanations cover KC1 only.
 - Explanation analyses use one train/test split and 30 modules per dataset. For Random Forest,
   LIME surrogate R² is low (0.12 to 0.25) and sign agreement varied between runs, so LIME
   weights should be treated as noisy.
 - Important features differ between datasets and between models, so explanations do not
   transfer across them.
+
+## Repository contents
+
+- `data/`: dataset files (JM1 is `jm1_clean.csv`, the standard OpenML version)
+- `notebooks/01_data_exploration.ipynb`: all experiments
+- `results/`: `baseline_results.csv`, `rsn_cv.csv`, `shap_lime_agreement.csv`,
+  `shap_lime_agreement_rsn.csv`, `shap_summary_jm1.png`, `shap_local_jm1.png`,
+  `lime_local_jm1.png`
 
 ## Reference
 
