@@ -38,6 +38,21 @@ Open `notebooks/01_data_exploration.ipynb` and run the cells in order. Outputs a
 `results/`. All random seeds are fixed to 42. The RSN cross-validation on JM1 takes about
 30 minutes on a CPU laptop, and the baseline and explanation cells take several minutes each.
 
+## Browser demo
+
+A small Streamlit app lets you pick a dataset, choose a test module (or type your own metrics)
+and see the predicted defect probability with SHAP and LIME explanations side by side, next to
+the true label. A third tab shows the saved results. The app uses the Random Forest model; the
+RSN results are in the notebook and in `results/`.
+
+```bash
+pip install streamlit
+streamlit run app.py
+```
+
+The app opens at http://localhost:8501. It reads `data/` and `results/`, so run it from the
+project folder.
+
 ## Method
 
 - Preprocessing: median imputation, min-max scaling and SMOTE (training data only, never on
@@ -135,24 +150,4 @@ reproduces the paper's architecture or results.
 - F1 scores are far below the 98% reported in the paper. We did not find the reason. Our RSN is
   a reconstruction: the paper does not specify how tabular metrics are mapped to the CNN input,
   and its reported model size (1.42 M parameters) is much larger than ours.
-- No outlier removal or correlation filter was applied (both are in the paper's pipeline).
-- RSN explanations cover KC1 only.
-- Explanation analyses use one train/test split and 30 modules per dataset. For Random Forest,
-  LIME surrogate R² is low (0.12 to 0.25) and sign agreement varied between runs, so LIME
-  weights should be treated as noisy.
-- Important features differ between datasets and between models, so explanations do not
-  transfer across them.
-
-## Repository contents
-
-- `data/`: dataset files (JM1 is `jm1_clean.csv`, the standard OpenML version)
-- `notebooks/01_data_exploration.ipynb`: all experiments
-- `results/`: `baseline_results.csv`, `rsn_cv.csv`, `shap_lime_agreement.csv`,
-  `shap_lime_agreement_rsn.csv`, `shap_summary_jm1.png`, `shap_local_jm1.png`,
-  `lime_local_jm1.png`
-
-## Reference
-
-Talatapeh, S.K., Ebrahimi Dishabi, M.R., Pezeshki, H., Madadi, H.: Explainable deep learning
-for software defect prediction: a residual-shuffle network approach with SHAP and LIME.
-Int. J. Data Sci. Anal. 22, 24 (2026). https://doi.org/10.1007/s41060-025-00987-6
+- No outlier removal or correlation filter was applied (both
